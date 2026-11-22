@@ -169,13 +169,27 @@ static func hatchling(parent: Node, pos: Vector3) -> Node3D:
 	root.add_child(head)
 	ball(head, Vector3.ZERO, 0.15, hide)
 	box(head, Vector3(0, -0.03, 0.15), Vector3(0.12, 0.09, 0.14), hide)
+	var eyes := Node3D.new()
+	eyes.name = "Eyes"
+	eyes.position = Vector3(0, 0.05, 0.1)
+	head.add_child(eyes)
 	for side in [-1.0, 1.0]:
-		ball(head, Vector3(0.08 * side, 0.05, 0.1), 0.052, Color(1.0, 0.85, 0.2), Vector3.ONE, 0.6)
-		ball(head, Vector3(0.085 * side, 0.05, 0.146), 0.022, INK)
+		ball(eyes, Vector3(0.08 * side, 0, 0), 0.052, Color(1.0, 0.85, 0.2), Vector3.ONE, 0.6)
+		ball(eyes, Vector3(0.085 * side, 0, 0.046), 0.022, INK)
 		cyl(head, Vector3(0.07 * side, 0.17, -0.04), 0.028, 0.11, CREAM, Vector3(-15, 0, -14 * side), 0.0)
-		box(root, Vector3(0.25 * side, 0.34, -0.03), Vector3(0.28, 0.02, 0.17), dark, Vector3(0, 0, 28 * side))
 		ball(root, Vector3(0.1 * side, 0.04, 0.12), 0.055, dark, Vector3(1, 0.6, 1.4))
-	cyl(root, Vector3(0, 0.13, -0.38), 0.05, 0.36, hide, Vector3(-78, 0, 0), 0.01)
+		# Wings hinge at the shoulder so they can flutter.
+		var wing := Node3D.new()
+		wing.name = "WingL" if side > 0.0 else "WingR"
+		wing.position = Vector3(0.12 * side, 0.3, -0.03)
+		wing.rotation_degrees.z = 28.0 * side
+		root.add_child(wing)
+		box(wing, Vector3(0.15 * side, 0, 0), Vector3(0.28, 0.02, 0.17), dark)
+	var tail := Node3D.new()
+	tail.name = "Tail"
+	tail.position = Vector3(0, 0.16, -0.2)
+	root.add_child(tail)
+	cyl(tail, Vector3(0, -0.03, -0.18), 0.05, 0.36, hide, Vector3(-78, 0, 0), 0.01)
 	return root
 
 

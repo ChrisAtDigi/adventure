@@ -58,14 +58,22 @@ func _ready() -> void:
 	_main.room.hotspots["carving"].look_handler.call()
 	await _use("desk")
 
-	# One line at real speed, to photograph the narrator's text box.
+	# One interaction at real speed: the inspector walks over, reaches out, the
+	# door refuses, they shrug, and the narrator types out the line.
 	Game.test_mode = false
-	Game.say("You are in the Arrivals Hall. There is a jingle. Exits: a turnstile, a staff door, and the way you came in, which has locked itself.")
-	await get_tree().create_timer(2.6).timeout
+	_said = []
+	_main.interact(_main.room.hotspots["staff_door"])
+	var ticks := 0
+	while _said.is_empty() and ticks < 900:
+		await get_tree().process_frame
+		ticks += 1
+	_check("at real speed, the action happens once the hand arrives", not _said.is_empty())
+	await get_tree().create_timer(1.3).timeout
 	await _shot("01b_narration")
 	Game.test_mode = true
 	_main.ui.skip_line()
 	_main.ui.skip_line()
+	await _idle()
 
 	await _use("turnstile", "token")
 	_check("token opens turnstile", Game.flag("turnstile_open") and not Game.has_item("token"))

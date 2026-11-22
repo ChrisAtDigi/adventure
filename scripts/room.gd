@@ -138,6 +138,7 @@ func spot(id: String, title: String, pos: Vector3, size: Vector3, approach: Vect
 ## The stock answer to using an item on something that doesn't want it.
 func refuse(item: String, title: String) -> void:
 	var names := [Game.item_name(item).to_lower(), title]
+	Game.react("shrug")
 	Game.say(REFUSALS[_refusal % REFUSALS.size()] % names)
 	_refusal += 1
 

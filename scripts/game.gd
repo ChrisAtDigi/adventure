@@ -8,6 +8,8 @@ signal narration(lines: Array)
 signal note_added(text: String)
 signal achievement_unlocked(id: String)
 signal flag_changed(flag_name: String)
+## Asks the inspector to act something out: "shrug", "startle" or "think".
+signal reaction(kind: String)
 
 const SAVE_PATH := "user://adventure_save.json"
 ## The cave's idea of a perfect score. Chapter One cannot reach it. That's the joke.
@@ -112,6 +114,10 @@ func item_name(id: String) -> String:
 func say(lines: Variant) -> void:
 	var list: Array = lines if lines is Array else [lines]
 	narration.emit(list)
+
+
+func react(kind: String) -> void:
+	reaction.emit(kind)
 
 
 ## Record an observation on the inspector's clipboard (once).

@@ -27,6 +27,7 @@ func _ready() -> void:
 	Game.flag_changed.connect(func(_flag: String) -> void:
 		if room:
 			room.refresh())
+	Game.reaction.connect(func(kind: String) -> void: player.gesture(kind))
 
 	# The title screen sits over an empty Arrivals Hall.
 	Game.reset()
@@ -92,14 +93,18 @@ func finish_chapter() -> void:
 	ui.show_ending()
 
 
-## Use a hotspot with whatever item is selected: walk over, then act.
+## Use a hotspot with whatever item is selected: walk over, reach out, then act.
 func interact(hotspot: Hotspot) -> void:
 	var item := Game.selected_item
 	Game.selected_item = ""
 	player.walk_to(hotspot.approach, func() -> void:
-		if is_instance_valid(hotspot) and hotspot.is_inside_tree():
-			player.face(hotspot.global_position)
-			hotspot.use_handler.call(item))
+		if not is_instance_valid(hotspot) or not hotspot.is_inside_tree():
+			return
+		player.face(hotspot.global_position)
+		var height := clampf((hotspot.global_position.y - 1.1) / 0.9, -1.0, 1.0)
+		player.gesture("reach", height, func() -> void:
+			if is_instance_valid(hotspot) and hotspot.is_inside_tree() and not locked:
+				hotspot.use_handler.call(item)))
 
 
 func _begin(room_id: String) -> void:
@@ -126,9 +131,9 @@ func _load_room(room_id: String, from: String) -> void:
 	add_child(room)
 	Game.room_id = room_id
 	Sfx.set_room(room_id)
-	player.stop()
 	player.global_position = room.spawns.get(from, room.spawns["default"])
 	player.rotation.y = 0.5
+	player.stop()
 
 
 ## Wait for the navigation map to pick up the new room's walkable area, so the
@@ -144,7 +149,10 @@ func _settle() -> void:
 
 
 func _process(_delta: float) -> void:
-	ui.set_hover(_hover_text())
+	# The inspector's head follows whatever the mouse is pointing at.
+	var hotspot := _hovered()
+	ui.set_hover(_hover_text(hotspot))
+	player.look_target = hotspot.global_position if hotspot else null
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -190,13 +198,20 @@ func _secondary_click(screen_pos: Vector2) -> void:
 	Game.selected_item = ""
 	var hotspot := _pick(screen_pos).get("collider") as Hotspot
 	if hotspot:
+		if not player.is_walking():
+			player.face(hotspot.global_position)
+			player.gesture("think")
 		hotspot.look_handler.call()
 
 
-func _hover_text() -> String:
+## The hotspot under the mouse, if the mouse is over the world.
+func _hovered() -> Hotspot:
 	if locked or ui.modal_open() or get_viewport().gui_get_hovered_control() != null:
-		return ""
-	var hotspot := _pick(get_viewport().get_mouse_position()).get("collider") as Hotspot
+		return null
+	return _pick(get_viewport().get_mouse_position()).get("collider") as Hotspot
+
+
+func _hover_text(hotspot: Hotspot) -> String:
 	if hotspot == null:
 		return ""
 	if Game.selected_item != "":

@@ -205,4 +205,5 @@ func _use_lift(item: String) -> void:
 		main.ui.open_keypad()
 	else:
 		Sfx.play("error")
+		Game.react("shrug")
 		Game.say("You press a stone button. Nothing. The lift has no power, which is the safest it will be all night.")

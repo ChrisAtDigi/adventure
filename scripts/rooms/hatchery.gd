@@ -65,7 +65,19 @@ func _process(delta: float) -> void:
 	_time += delta
 	# The hatchling fidgets, the unhatched egg rocks, and the eyes in the dark blink.
 	_hatchling.position.y = 2.0 + absf(sin(_time * 2.2)) * 0.03
-	_hatchling.get_node("Head").rotation.z = sin(_time * 1.3) * 0.25
+	# It watches the inspector, head cocked, and flutters and wags when it feels like it.
+	var head: Node3D = _hatchling.get_node("Head")
+	var watched: Vector3 = _hatchling.to_local(main.player.global_position + Vector3(0, 1.4, 0))
+	var aim := Vector3(
+			clampf(-atan2(watched.y - 0.42, Vector2(watched.x, watched.z).length()), -0.3, 0.7),
+			clampf(atan2(watched.x, watched.z), -1.2, 1.2),
+			sin(_time * 1.3) * 0.2)
+	head.rotation = head.rotation.lerp(aim, minf(1.0, delta * 6.0))
+	head.get_node("Eyes").scale.y = 0.1 if fmod(_time, 2.9) < 0.12 else 1.0
+	var flutter := sin(_time * 34.0) * 0.5 if fmod(_time, 4.3) < 0.45 else 0.0
+	_hatchling.get_node("WingL").rotation.z = deg_to_rad(28.0) + flutter
+	_hatchling.get_node("WingR").rotation.z = deg_to_rad(-28.0) - flutter
+	_hatchling.get_node("Tail").rotation.y = sin(_time * 3.0) * 0.35
 	if not Game.flag("heat_off"):
 		_ember_egg.rotation.z = sin(_time * 5.0) * 0.12 if fmod(_time, 5.0) < 0.9 else 0.0
 	_eyes.scale.y = 0.1 if fmod(_time, 3.7) < 0.14 else 1.0
@@ -225,6 +237,7 @@ func _use_window(item: String) -> void:
 	if Game.flag("fences_off"):
 		Game.say("You tap the glass. Nothing taps back. You find that you miss it.")
 	else:
+		Game.react("startle")
 		Game.say([
 			"You tap the glass. You are an inspector. It is practically the job.",
 			"Something taps back. Same rhythm. Slightly harder.",
@@ -272,6 +285,7 @@ func _use_hatchling(item: String) -> void:
 	elif item == "picker":
 		Game.say("You reach up with the litter picker. The hatchling bites the end, thoughtfully, and lets go. It was only checking.")
 	elif item == "":
+		Game.react("startle")
 		Game.say([
 			"You hold out a hand. The hatchling clutches the staff pass to its chest and hisses like a small kettle.",
 			"It will not come down for nothing. It might come down for something better.",

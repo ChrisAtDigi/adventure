@@ -268,6 +268,7 @@ func _use_turnstile(item: String) -> void:
 		Game.say("The turnstile swallows the token and unlocks with a cheerful ding. You have paid to enter a disaster.")
 	elif item == "":
 		Sfx.play("error")
+		Game.react("shrug")
 		Game.say([
 			"The turnstile is locked. A slot says INSERT VISITOR TOKEN.",
 			"A smaller sign says NO TOKEN, NO DRAGONS, NO REFUNDS.",
@@ -283,6 +284,7 @@ func _use_bell(item: String) -> void:
 		Sfx.play("bell")
 		Game.set_flag("bell_rung")
 		Game.award("rang_bell")
+		Game.react("startle")
 		Game.say([
 			"Ding. Nobody comes.",
 			"Then, from a long way below the floor: ding.",
@@ -312,6 +314,7 @@ func _use_cinders(item: String) -> void:
 		Sfx.play("thunk")
 		if not Game.flag("cinders_pulled"):
 			Game.set_flag("cinders_pulled")
+			Game.react("startle")
 			Game.say([
 				"You pull the tail. Inside the statue something goes clunk, then stops, then makes the noise of a machine being embarrassed.",
 				"Something is jammed in its throat, a long way down.",
@@ -338,6 +341,7 @@ func _use_staff_door(item: String) -> void:
 		Game.say("You could jab the card reader with the litter picker. It would make you feel better. It would not open the door.")
 	elif item == "":
 		Sfx.play("error")
+		Game.react("shrug")
 		Game.say("STAFF ONLY. The card reader glows red. It wants a staff pass, and it is not going to be reasonable about it.")
 	else:
 		refuse(item, "staff door")
