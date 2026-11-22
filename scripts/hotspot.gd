@@ -1,22 +1,16 @@
 class_name Hotspot
 extends StaticBody3D
-## Something in a room the player can look at or interact with.
-## Add a Marker3D child named "Approach" to set where the character stands to use it.
+## Something in a room the player can look at or use. Created with Room.spot().
 
-@export var display_name := "thing"
-@export_multiline var look_text := "Nothing special."
-
-
-func approach_position() -> Vector3:
-	var marker := get_node_or_null("Approach") as Node3D
-	return marker.global_position if marker else global_position
-
-
-func look() -> void:
-	Game.say(look_text)
+var id := ""
+var display_name := "thing"
+## Where the inspector stands to use it.
+var approach := Vector3.ZERO
+## Called with no arguments on a right click.
+var look_handler := Callable()
+## Called with the inventory item being used on it, or "" for a plain interaction.
+var use_handler := Callable()
 
 
-## Called once the character has walked over. `item` is the inventory item being
-## used on this hotspot, or "" for a plain interaction.
-func interact(_item: String) -> void:
-	Game.say("Nothing happens.")
+func set_active(active: bool) -> void:
+	collision_layer = 1 if active else 0
